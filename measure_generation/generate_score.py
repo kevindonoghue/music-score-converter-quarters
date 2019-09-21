@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 
 
-def generate_measure(total, key_number, rest_prob, chord_probs, measure_number):
+def generate_measure(total, rest_prob, chord_probs, measure_number):
     # total is the total length of the measure in 16th notes
     # clef is either 'treble' or 'bass'
     # key is in range(-7, 8)
@@ -113,7 +113,7 @@ def generate_measure(total, key_number, rest_prob, chord_probs, measure_number):
     for clef_type in ('treble', 'bass'):
         staff_number = 1 if clef_type == 'treble' else 2
         chords[clef_type] = [chord_to_soup(chord, rhythm[clef_type][i], staff_number) for i, chord in enumerate(chords[clef_type])]
-        if np.random.rand() < 0.5 and len(chords[clef_type]) > 1:
+        if np.random.rand() < 0 and len(chords[clef_type]) > 1:
             slur_indices = np.random.choice(len(chords[clef_type]), size=2, replace=False)
             initial_index = np.min(slur_indices)
             final_index = np.max(slur_indices)
@@ -131,7 +131,7 @@ def generate_measure(total, key_number, rest_prob, chord_probs, measure_number):
                 final_note.append(notations)
                 notations.append(slur)
         for i, chord in enumerate(chords[clef_type]):
-            if np.random.rand() < 0.2 and staff_number == 1:
+            if np.random.rand() < 0 and staff_number == 1:
                 direction = soup.new_tag('direction')
                 direction['placement'] = 'below'
                 direction_type = soup.new_tag('direction-type')
@@ -224,7 +224,7 @@ def generate_score(num_measures, measure_length, key_number, rest_prob, chord_pr
     attributes = generate_attributes(measure_length, key_number)
 
     for i in range(num_measures):
-        measure = generate_measure(measure_length, key_number, rest_prob, chord_probs, i+1)
+        measure = generate_measure(measure_length, rest_prob, chord_probs, i+1)
         if i == 0:
             measure.insert(0, attributes)
         part.append(measure)
@@ -237,5 +237,5 @@ chord_probs = np.array([5, 1, 5, 5, 5, 5, 1, 100, 1, 5, 5, 5, 5, 1, 5])
 chord_probs = chord_probs / chord_probs.sum()
 # print(generate_score(16, 4, 3, 0.2, chord_probs).prettify())
 
-# with open('sample_score2.musicxml', 'w+') as f:
+# with open('sample_score.musicxml', 'w+') as f:
 #     f.write(str(generate_score(64, 16, 3, 0.2, chord_probs)))

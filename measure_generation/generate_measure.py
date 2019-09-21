@@ -209,9 +209,9 @@ def generate_measure(total, key_number, rest_prob, chord_probs):
     return soup
         
 
-chord_probs = np.array([0, 0, 0, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0])
+chord_probs = np.array([5, 1, 5, 5, 5, 5, 1, 100, 1, 5, 5, 5, 5, 1, 5])
 chord_probs = chord_probs / chord_probs.sum()
 # print(generate_measure(16, 'treble', 3, 0.2).prettify())
 
-with open('sample_measure.musicxml', 'w+') as f:
-    f.write(str(generate_measure(12, 3, 0.2, chord_probs)))
+# with open('sample_measure.musicxml', 'w+') as f:
+#     f.write(str(generate_measure(12, 3, 0.2, chord_probs)))
