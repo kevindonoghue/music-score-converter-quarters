@@ -93,6 +93,8 @@ tp[2] = {None: 100,
 
 tp[1] = {None: 1}
 
+
+# normalize transition probabilities to be actual probabilities
 new = dict()
 for div in tp:
     new[div] = dict()

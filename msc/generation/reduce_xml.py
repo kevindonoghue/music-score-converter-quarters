@@ -1,5 +1,8 @@
 from bs4 import BeautifulSoup
 
+# Musescore outputs a verbose musicxml file and the pseudocode I use only uses some of those tags
+# this removes all unnecessary tags from the musicxml file
+
 def reduce_xml(path):
     with open(path) as f:
         soup = BeautifulSoup(f, 'xml')
@@ -21,6 +24,6 @@ def reduce_xml(path):
 
     return soup
 
-reduced = reduce_xml('slur_beam_dynamic_example.musicxml')
-with open('slur_beam_dynamic_example_reduced.musicxml', 'w+') as f:
-    f.write(str(reduced))
+# reduced = reduce_xml('slur_beam_dynamic_example.musicxml')
+# with open('slur_beam_dynamic_example_reduced.musicxml', 'w+') as f:
+#     f.write(str(reduced))

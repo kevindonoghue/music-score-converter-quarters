@@ -157,6 +157,7 @@ def generate_measure(total, rest_prob, chord_probs, measure_number):
 
 
 def generate_attributes(measure_length, key_number):
+    # create the attributes tag to be placed in the first measure
     soup = BeautifulSoup('', 'xml')
     attributes = soup.new_tag('attributes')
     divisions = soup.new_tag('divisions')
@@ -200,6 +201,10 @@ def generate_attributes(measure_length, key_number):
 
 
 def generate_score(num_measures, measure_length, key_number, rest_prob, chord_probs):
+    # generates a score num_measures measures long
+    # measure_length is the number of sixteenth notes in a measure
+    # see below for an example of chord_probs
+    # the chord_probs[i] is the probability of adding a note off an i-7 interval (where the interval 1 is a unison)
     soup = BeautifulSoup('', 'xml')
     score_partwise = soup.new_tag('score-partwise', version='3.1')
     work = soup.new_tag('work')

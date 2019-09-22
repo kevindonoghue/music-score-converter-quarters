@@ -2,7 +2,10 @@ from bs4 import BeautifulSoup, Tag, NavigableString
 from pprint import pprint
 
 
+
+
 def tag_to_pc(tag):
+    # converts a tag to pseudocode, like <tagName>x y z</tagName>  -->  ['tagName', 'x', 'y', 'z', '}']
     children = tag.findChildren(recursive=False)
     if not children:
         if tag.string:
@@ -21,6 +24,7 @@ def tag_to_pc(tag):
         return pc
 
 def clean_pitches(soup):
+    # alter the musicxml notation for pitches to use fewer tags
     pitches = soup.find_all('pitch')
     for pitch in pitches:
         step = pitch.find('step')
@@ -40,6 +44,7 @@ def clean_pitches(soup):
 
 
 def clean_dynamics(soup):
+    # alter the musicxml notation for dynamics to use fewer tags
     direction_tags = soup.find_all('direction')
     if direction_tags:
         for direction_tag in direction_tags:
@@ -50,6 +55,7 @@ def clean_dynamics(soup):
 
 
 def clean_slurs(soup):
+    # alter the musicxml notation for slurs to use fewer tags
     notations_tags = soup.find_all('notations')
     if notations_tags:
         for notations_tag in notations_tags:
@@ -58,13 +64,16 @@ def clean_slurs(soup):
 
 
 def get_key_and_time(soup):
+    # get the key signature and time signature information from the musicxml
+    # this is not stored in the pseudocode, and must be kept elsewhere
     key = int(soup.find('fifths').string)
     measure_length = 4*int(soup.find('beats').string)
     return key, measure_length
 
 
-
 def xml_to_pc(soup):
+    # converts xml to a psuedo code where
+    # <tagName>x y z</tagName>  -->  ['tagName', 'x', 'y', 'z', '}']
     clean_pitches(soup)
     clean_dynamics(soup)
     clean_slurs(soup)

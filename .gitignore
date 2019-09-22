@@ -111,3 +111,5 @@ measure_generation/completed_data/
 *.musicxml
 *.svg
 *.png
+archive/
+data/

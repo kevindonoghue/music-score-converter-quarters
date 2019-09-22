@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup, Tag, NavigableString
 
+# converts pseudocode to musicxml
 
 tag_names = ['score-partwise', 'part-list', 'score-part', 'part-name', 'part', 'measure', 'attributes', 'divisions',
              'key', 'fifths', 'time', 'beats', 'beat-type', 'clef', 'sign', 'line', 'note', 'pitch', 'step', 'alter', 'octave',
@@ -31,6 +32,8 @@ def fix_pitches(soup):
 
 
 def fix_slurs(soup):
+    # in generating the pseudocode, the syntax for slurs is simplified
+    # this undos that simplification
     slurs = soup.find_all('slur')
     if len(slurs) % 2 == 1:
         slurs = slurs[:-1]
@@ -53,6 +56,8 @@ def fix_slurs(soup):
         i += 2
 
 def fix_dynamics(soup):
+    # in generating the pseudocode, the syntax for dynamics is simplified
+    # this undos that simplification
     old_dynamics = soup.find_all(['ff', 'f', 'mf', 'mp', 'p', 'pp'])
     for old_dynamic in old_dynamics:
         direction = soup.new_tag('direction')
@@ -65,6 +70,7 @@ def fix_dynamics(soup):
 
 def add_measure_numbers(soup):
     measures = soup.find_all('measure')
+    # adds tags in the musicxml corresponding to measure numbers
     for i, measure in enumerate(measures):
         measure['number'] = str(i+1)
 
@@ -118,16 +124,16 @@ def restore_attributes(soup, measure_length, key_number):
 
 
 def first_split(arr):
-        # arr is a list that goes [tag_name, ... '}',...]
-        # this returns the two ellipses ...
-        counter = 0
-        for i, x in enumerate(arr):
-            if x in tag_names:
-                counter += 1
-            if x == '}':
-                counter -= 1
-            if counter == 0:
-                return arr[1:i], arr[i+1:]
+    # arr is a list that goes [tag_name, ... '}',...]
+    # this returns the two ellipses ...
+    counter = 0
+    for i, x in enumerate(arr):
+        if x in tag_names:
+            counter += 1
+        if x == '}':
+            counter -= 1
+        if counter == 0:
+            return arr[1:i], arr[i+1:]
 
 
 def pc_to_xml_helper(pc):
@@ -146,6 +152,7 @@ def pc_to_xml_helper(pc):
 
 
 def pc_to_xml(pc, measure_length, key_number):
+    # converts pseudocode to musicxml
     soup = BeautifulSoup(features='xml')
     score_partwise = soup.new_tag('score-partwise', version='3.1')
     part_list = soup.new_tag('part-list')
