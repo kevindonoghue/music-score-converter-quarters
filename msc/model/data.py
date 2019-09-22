@@ -45,7 +45,7 @@ class MeasureDataset(Dataset):
             self.aux_data = d['aux_data']
         item_lengths = []
         for x in self.aux_data:
-            item_lengths.append(len(x['pc']) + seq_len - 1)
+            item_lengths.append(len(x['pc']) + seq_len - 2) # seq_len-1 for appended padding and -1 because you'll want two sequences offset by 1
         cum_lengths = np.cumsum(item_lengths)
         self.length = cum_lengths[-1]
         self.lower_bounds = np.concatenate([[0], cum_lengths[:-1]])
@@ -68,16 +68,18 @@ class MeasureDataset(Dataset):
         arr = np.array([processed_image, measure_data_channel])
         arr = torch.Tensor(arr).type(torch.float).to(self.device)
         start_index = i - self.lower_bounds[image_number]
-        seq1 = torch.Tensor(pc[start_index:start_index+self.seq_len]).type(torch.long).to(self.device)
-        seq2 = torch.Tensor(pc[start_index+1:start_index+self.seq_len+1]).type(torch.long).to(self.device)
-        pc = torch.Tensor(pc).type(torch.long).to(self.device)
-        measure_length = torch.Tensor([measure_length]).type(torch.long).to(self.device)
-        key_number = torch.Tensor([key_number]).type(torch.long).to(self.device)
-        return {'arr': arr, 'seq1': seq1, 'seq2': seq2, 'pc': pc, 'measure_length': measure_length, 'key_number': key_number}
+        seq1 = torch.Tensor(padded_pc[start_index:start_index+self.seq_len]).type(torch.long).to(self.device)
+        seq2 = torch.Tensor(padded_pc[start_index+1:start_index+self.seq_len+1]).type(torch.long).to(self.device)
+        
+        # pc = torch.Tensor(pc).type(torch.long).to(self.device)
+        # measure_length = torch.Tensor([measure_length]).type(torch.long).to(self.device)
+        # key_number = torch.Tensor([key_number]).type(torch.long).to(self.device)
+        image_number = torch.Tensor([image_number]).type(torch.long).to(self.device)
+        return {'arr': arr, 'seq1': seq1, 'seq2': seq2, 'image_number': image_number}
 
 
 def get_data(path, batch_size, seq_len, height, width, device):
     # produces a measure dataset (arguments same as in that class) and its dataloader (with batch size batch_size)
     dataset = MeasureDataset(path, seq_len, height, width, device)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=8)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=0)
     return dataset, dataloader

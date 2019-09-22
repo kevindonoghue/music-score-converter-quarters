@@ -8,6 +8,13 @@ from skimage import io, transform
 from skimage.color import rgb2gray
 
 
+def convert_seconds(x):
+    hours = int(x // 3600)
+    minutes = int((x % 3600) // 60)
+    seconds = int(x % 60)
+    return f'{hours}h {minutes}m {seconds}s'
+
+
 class ConvSubunit(nn.Module):
     def __init__(self, input_size, output_size, filter_size, stride, padding, dropout):
         super().__init__()
@@ -36,13 +43,12 @@ class Net(nn.Module):
         self.lstm_hidden_size = lstm_hidden_size
         self.fc1_output_size = fc1_output_size
         self.device = device
-        self.to(device)
         self.num_iterations = 0
         self.train_time = 0
         self.cnn = nn.Sequential(ConvUnit(2, 64, 3, 2, 1, 0.25), # (200, 200) --> (100, 100)
                                  ConvUnit(64, 128, 3, 2, 1, 0.25), # (100, 100) --> (50, 50)
-                                 ConvUnit(128, 128, 3, 4, 5, 0.25), # (50, 50) --> (10, 10)
-                                 ConvUnit(128, 128, 3, 5, 5, 0.25)) # (10, 10) --> (2, 2)
+                                 ConvUnit(128, 128, 3, 5, 1, 0.25), # (50, 50) --> (10, 10)
+                                 ConvUnit(128, 128, 3, 5, 1, 0.25)) # (10, 10) --> (2, 2)
         self.fc1 = nn.Linear(512, self.fc1_output_size)
         self.embed = nn.Embedding(num_embeddings=self.len_lexicon, embedding_dim=5)
         self.lstm1 = nn.LSTM(input_size=5, hidden_size=self.lstm_hidden_size, num_layers=2, batch_first=True, dropout=0.25)
@@ -59,13 +65,13 @@ class Net(nn.Module):
         if internal1:
             h1, c1 = internal1
         else:
-            h1 = torch.zeros(2, bs, self.lstm_hidden_size).cuda()
-            c1 = torch.zeros(2, bs, self.lstm_hidden_size).cuda()
+            h1 = torch.zeros(2, bs, self.lstm_hidden_size).to(self.device)
+            c1 = torch.zeros(2, bs, self.lstm_hidden_size).to(self.device)
         if internal2:
             h2, c2 = internal2
         else:
-            h2 = torch.zeros(2, bs, self.lstm_hidden_size).cuda()
-            c2 = torch.zeros(2, bs, self.lstm_hidden_size).cuda()
+            h2 = torch.zeros(2, bs, self.lstm_hidden_size).to(self.device)
+            c2 = torch.zeros(2, bs, self.lstm_hidden_size).to(self.device)
         image_output = self.fc1(self.cnn(image_input).view(bs, 512))
         image_output = image_output.repeat(1, sl).view(bs, sl, self.fc1_output_size)
         language_output, (h1, c1) = self.lstm1(self.embed(language_input), (h1, c1))
@@ -79,12 +85,12 @@ class Net(nn.Module):
         self.ix_to_word = dataset.ix_to_word
         self.height = dataset.height
         self.width = dataset.width
+        aux_data = dataset.aux_data
         total_iterations = num_epochs * len(dataloader)
         print('starting fit')
         for epoch_num in range(num_epochs):
+            iteration_start_time = time.time()
             for batch in dataloader:
-                print(f'starting iteration: {self.num_iterations}')
-                iteration_start_time = time.time()
                 self.num_iterations += 1
                 self.train()
                 arr = batch['arr']
@@ -105,36 +111,40 @@ class Net(nn.Module):
                     hours_elapsed = time_elapsed // 3600
                     minutes_elapsed = (time_elapsed % 3600) // 60
                     seconds_elapsed = time_elapsed % 60
-                    time_per_iteration = self.num_iterations/time_elapsed
+                    if time_elapsed == 0:
+                        time_per_iteration = 0
+                    else:
+                        time_per_iteration = self.num_iterations/time_elapsed
                     time_left = (total_iterations - self.num_iterations) * time_per_iteration
                     n = np.random.randint(len(dataset))
                     item = dataset[n]
                     arr = item['arr']
-                    pc = item['pc'].cpu().numpy()
-                    pc = ' '.joint([self.ix_to_word(str(ix)) for ix in pc])
+                    image_number = item['image_number'].item()
+                    pc = aux_data[image_number]['pc']
+                    pc = ' '.join([self.ix_to_word[str(ix)] for ix in pc])
                     pred_seq = self.predict(arr)
                     pred_seq = ' '.join(pred_seq)
-                    print('predicted: ' + pred_seq)
-                    print('true: ' + pc)
-                    with open('./2019-09-22/log.txt', 'a+') as f:
+                    with open('./log.txt', 'a+') as f:
                         info_string = f"""
-                        iteration: {self.num_iterations}
-                        epochs: {self.num_iterations/len(dataloader)}
-                        time elapsed: {hours_elapsed}h {minutes_elapsed}m {seconds_elapsed}s
-                        time left: {time_left}
+                        ----
+                        iteration: {self.num_iterations} epochs: {self.num_iterations/len(dataloader)}
+                        time elapsed: {convert_seconds(time_elapsed)} time left: {convert_seconds(time_left)}
+                        ----
                         pred: {pred_seq}
-                        
+                        ----
                         true: {pc}
+                        ----
 
 
 
-                        """
+                        """.replace('    ', '')
                         print(info_string)
                         f.write(info_string)
-            self.train_time += time.time() - iteration_start_time
+                self.train_time += time.time() - iteration_start_time
+                iteration_start_time = time.time()
         for param_group in optimizer.param_groups:
             param_group['lr'] *= rate_decay
-        torch.save(self, f'./2019-09-22/epoch_{epoch_num+1}.pt')
+        torch.save(self, f'./epoch_{epoch_num+1}.pt')
                 
              
     def predict(self, arr):
