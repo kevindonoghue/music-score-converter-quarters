@@ -20,7 +20,9 @@ other_data['aux_data'] = []
 for i in range(1, 5):
     with open(f'data/data{i}/extra_data{i}.json') as f:
         extra_data = json.load(f)
-    for j in range(2):
+    for j in range(10000):
+        if j % 100 == 0:
+            print(f'data{i}: {j}')
         png_path = f'data/data{i}/{j}-1.png'
         svg_path = f'data/data{i}/{j}-1.svg'
         image_np = crop(png_path, svg_path)

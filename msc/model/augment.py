@@ -127,8 +127,11 @@ def random_shrink_note_spacing(x):
 def random_resize(x):
     left = int(np.maximum(-1, x.shape[1]*np.random.randn()*0.1))
     right = int(np.maximum(-10, x.shape[1]*np.random.randn()*0.1))
-    top = int(np.abs(x.shape[0]*np.random.randn()*0.15))
-    bottom = int(np.abs(x.shape[0]*np.random.randn()*0.15))
+    vertical_base = np.abs(x.shape[0]*np.random.randn()*0.3)
+    top = int(np.maximum(vertical_base + np.random.randn()*0.1, 0))
+    bottom = int(np.maximum(vertical_base + np.random.randn()*0.15, 0))
+    # top = int(np.abs(x.shape[0]*np.random.randn()*0.3))
+    # bottom = int(np.abs(x.shape[0]*np.random.randn()*0.3))
     if left > 0:
         x = extend_left(x, left)
     else:
@@ -180,7 +183,7 @@ def random_pre_augmentation(x):
         x = random_shrink_whitespace(x)
     if np.random.rand() < 0.8:
         x = random_shrink_note_spacing(x)
-    if np.random.rand() < 0.8:
+    if np.random.rand() < 0.9:
         x = random_resize(x)
     if np.random.rand() < 0.5:
         x = random_thicken(x)

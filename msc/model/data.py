@@ -5,8 +5,8 @@ import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import json
 from skimage import io
-from augment import random_augmentation
-from model import device
+from .augment import random_augmentation
+
 
 def get_measure_data_channel(measure_length, key_number, height, width):
     # gets an extra channel containing the time and key sig info
@@ -25,21 +25,23 @@ def get_measure_data_channel(measure_length, key_number, height, width):
 
 
 class MeasureDataset(Dataset):
-    def __init__(self, path, seq_len, height, width):
+    def __init__(self, path, seq_len, height, width, device):
         # path is a path to a folder that contains png files named i.png and a json file other_data.json
-        # other_data.json contains a dictionary d with d['lex_data'] containing two dictionaries word_to_ix and ix_to_word
+        # other_data.json contains a dictionary d with d['lexicon'] containing two dictionaries word_to_ix and ix_to_word
         # and d['aux_data'] containing a list of dictionaries containing the pseudocode, measure_length, and key_number data for i.png
         # the pseudocode has already been converted into numerical indices via word_to_ix
         # seq_len is the length of a sequence plugged into the lstm during train time
         # the images are rescaled to shape (height, width)
+        # device is either 'cpu' or 'cuda'
         self.path = path
         self.seq_len = seq_len
         self.height = height
         self.width = width
+        self.device = device
         with open(path + 'other_data.json') as f:
             d = json.load(f)
-            self.word_to_ix = d['lex_data']['word_to_ix']
-            self.ix_to_word = d['lex_data']['ix_to_word']
+            self.word_to_ix = d['lexicon']['word_to_ix']
+            self.ix_to_word = d['lexicon']['ix_to_word']
             self.aux_data = d['aux_data']
         item_lengths = []
         for x in self.aux_data:
@@ -56,25 +58,26 @@ class MeasureDataset(Dataset):
         image_number = np.argmax((self.lower_bounds <= i)*(self.upper_bounds > i))
         measure_data = self.aux_data[image_number]
         pc = measure_data['pc']
-        padded_pc = [self.word_to_ix('<PAD>')]*(self.seq_len-1) + pc + [self.word_to_ix('<PAD>')]*(self.seq_len-1)
+        padded_pc = [self.word_to_ix['<PAD>']]*(self.seq_len-1) + pc + [self.word_to_ix['<PAD>']]*(self.seq_len-1)
         padded_pc = np.array(padded_pc)
         measure_length = measure_data['measure_length']
         key_number = measure_data['key_number']
         measure_data_channel = get_measure_data_channel(measure_length, key_number, self.height, self.width)
-        raw_image = io.imread(self.path + f'/{image_number}.png')
+        raw_image = io.imread(self.path + f'/{image_number}.png')/255
         processed_image = random_augmentation(raw_image, self.height, self.width)
-        arr = np.concatenate([processed_image, measure_data_channel])
-        arr = torch.Tensor(arr).astype(torch.float).to(device)
+        arr = np.array([processed_image, measure_data_channel])
+        arr = torch.Tensor(arr).type(torch.float).to(self.device)
         start_index = i - self.lower_bounds[image_number]
-        seq1 = torch.Tensor(pc[start_index:start_index+self.seq_len]).astype(torch.long).to(device)
-        seq2 = torch.Tensor(pc[start_index+1:start_index+self.seq_len+1]).astype(torch.long).to(device)
-        pc = torch.Tensor(pc).astype(torch.long).to(device)
-        measure_length = torch.Tensor(measure_length).astype(torch.long).to(device)
-        key_number = torch.Tensor(key_number).astype(torch.long).to(device)
+        seq1 = torch.Tensor(pc[start_index:start_index+self.seq_len]).type(torch.long).to(self.device)
+        seq2 = torch.Tensor(pc[start_index+1:start_index+self.seq_len+1]).type(torch.long).to(self.device)
+        pc = torch.Tensor(pc).type(torch.long).to(self.device)
+        measure_length = torch.Tensor([measure_length]).type(torch.long).to(self.device)
+        key_number = torch.Tensor([key_number]).type(torch.long).to(self.device)
         return {'arr': arr, 'seq1': seq1, 'seq2': seq2, 'pc': pc, 'measure_length': measure_length, 'key_number': key_number}
 
 
-def get_data(path, batch_size, seq_len, height, width):
-    dataset = MeasureDataset(path, seq_len, height, width)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+def get_data(path, batch_size, seq_len, height, width, device):
+    # produces a measure dataset (arguments same as in that class) and its dataloader (with batch size batch_size)
+    dataset = MeasureDataset(path, seq_len, height, width, device)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=8)
     return dataset, dataloader
