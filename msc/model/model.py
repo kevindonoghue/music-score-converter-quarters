@@ -80,7 +80,7 @@ class Net(nn.Module):
         out = self.fc2(lstm2_out)
         return out, (h1, c1), (h2, c2)
     
-    def fit(self, dataset, dataloader, optimizer, loss_fn, num_epochs, rate_decay):
+    def fit(self, dataset, dataloader, optimizer, loss_fn, num_epochs, rate_decay, print_every=100):
         self.word_to_ix = dataset.word_to_ix
         self.ix_to_word = dataset.ix_to_word
         self.height = dataset.height
@@ -106,7 +106,7 @@ class Net(nn.Module):
                 optimizer.step()
                 optimizer.zero_grad()
 
-                if self.num_iterations % 1 == 0:
+                if self.num_iterations % print_every == 0:
                     time_elapsed = self.train_time
                     hours_elapsed = time_elapsed // 3600
                     minutes_elapsed = (time_elapsed % 3600) // 60
