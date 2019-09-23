@@ -25,7 +25,7 @@ def get_measure_data_channel(measure_length, key_number, height, width):
 
 
 class MeasureDataset(Dataset):
-    def __init__(self, path, seq_len, height, width, device):
+    def __init__(self, path, seq_len, height, width):
         # path is a path to a folder that contains png files named i.png and a json file other_data.json
         # other_data.json contains a dictionary d with d['lexicon'] containing two dictionaries word_to_ix and ix_to_word
         # and d['aux_data'] containing a list of dictionaries containing the pseudocode, measure_length, and key_number data for i.png
@@ -37,7 +37,6 @@ class MeasureDataset(Dataset):
         self.seq_len = seq_len
         self.height = height
         self.width = width
-        self.device = device
         with open(path + 'other_data.json') as f:
             d = json.load(f)
             self.word_to_ix = d['lexicon']['word_to_ix']
@@ -66,20 +65,16 @@ class MeasureDataset(Dataset):
         raw_image = io.imread(self.path + f'/{image_number}.png')/255
         processed_image = random_augmentation(raw_image, self.height, self.width)
         arr = np.array([processed_image, measure_data_channel])
-        arr = torch.Tensor(arr).type(torch.float).to(self.device)
+        arr = torch.Tensor(arr).type(torch.float)
         start_index = i - self.lower_bounds[image_number]
-        seq1 = torch.Tensor(padded_pc[start_index:start_index+self.seq_len]).type(torch.long).to(self.device)
-        seq2 = torch.Tensor(padded_pc[start_index+1:start_index+self.seq_len+1]).type(torch.long).to(self.device)
-        
-        # pc = torch.Tensor(pc).type(torch.long).to(self.device)
-        # measure_length = torch.Tensor([measure_length]).type(torch.long).to(self.device)
-        # key_number = torch.Tensor([key_number]).type(torch.long).to(self.device)
-        image_number = torch.Tensor([image_number]).type(torch.long).to(self.device)
+        seq1 = torch.Tensor(padded_pc[start_index:start_index+self.seq_len]).type(torch.long)
+        seq2 = torch.Tensor(padded_pc[start_index+1:start_index+self.seq_len+1]).type(torch.long)
+        image_number = torch.Tensor([image_number]).type(torch.long)
         return {'arr': arr, 'seq1': seq1, 'seq2': seq2, 'image_number': image_number}
 
 
-def get_data(path, batch_size, seq_len, height, width, device, num_workers=4):
+def get_data(path, batch_size, seq_len, height, width, num_workers=4):
     # produces a measure dataset (arguments same as in that class) and its dataloader (with batch size batch_size)
-    dataset = MeasureDataset(path, seq_len, height, width, device)
+    dataset = MeasureDataset(path, seq_len, height, width)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
     return dataset, dataloader

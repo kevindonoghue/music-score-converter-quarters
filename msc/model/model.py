@@ -93,9 +93,9 @@ class Net(nn.Module):
             for batch in dataloader:
                 self.num_iterations += 1
                 self.train()
-                arr = batch['arr']
-                seq1 = batch['seq1']
-                seq2 = batch['seq2']
+                arr = batch['arr'].to(self.device)
+                seq1 = batch['seq1'].to(self.device)
+                seq2 = batch['seq2'].to(self.device)
                 bs = arr.shape[0]
                 sl = seq1.shape[1]
                 out, _, _ = self.forward(arr, seq1)
@@ -108,9 +108,6 @@ class Net(nn.Module):
 
                 if self.num_iterations % print_every == 0:
                     time_elapsed = self.train_time
-                    hours_elapsed = time_elapsed // 3600
-                    minutes_elapsed = (time_elapsed % 3600) // 60
-                    seconds_elapsed = time_elapsed % 60
                     if time_elapsed == 0:
                         time_per_iteration = 0
                     else:
@@ -118,7 +115,7 @@ class Net(nn.Module):
                     time_left = (total_iterations - self.num_iterations) * time_per_iteration
                     n = np.random.randint(len(dataset))
                     item = dataset[n]
-                    arr = item['arr']
+                    arr = item['arr'].to(self.device)
                     image_number = item['image_number'].item()
                     pc = aux_data[image_number]['pc']
                     pc = ' '.join([self.ix_to_word[str(ix)] for ix in pc])
