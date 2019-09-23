@@ -78,8 +78,8 @@ class MeasureDataset(Dataset):
         return {'arr': arr, 'seq1': seq1, 'seq2': seq2, 'image_number': image_number}
 
 
-def get_data(path, batch_size, seq_len, height, width, device):
+def get_data(path, batch_size, seq_len, height, width, device, num_workers=4):
     # produces a measure dataset (arguments same as in that class) and its dataloader (with batch size batch_size)
     dataset = MeasureDataset(path, seq_len, height, width, device)
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=0)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
     return dataset, dataloader
