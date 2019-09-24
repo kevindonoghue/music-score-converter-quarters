@@ -20,7 +20,7 @@ def get_measure_data_channel(measure_length, key_number, height, width):
         vec[1, 0] += 1
     elif measure_length == 16:
         vec[1, 1] += 1
-    tiled = np.tile(vec, (int(height/2), int(width/20)))
+    tiled = np.tile(vec, (int(height/2), int(width/20))).astype(np.uint8)
     return tiled
 
 
@@ -173,5 +173,12 @@ class MeasureDatasetRaw(Dataset):
 def get_data(path, batch_size, seq_len, height, width, num_workers=4):
     # produces a measure dataset (arguments same as in that class) and its dataloader (with batch size batch_size)
     dataset = MeasureDataset(path, seq_len, height, width)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    return dataset, dataloader
+
+
+def get_data_raw(path, num_images, batch_size, seq_len, height, width, num_workers=4):
+    # produces a measure dataset (arguments same as in that class) and its dataloader (with batch size batch_size)
+    dataset = MeasureDatasetRaw(path, num_images, seq_len, height, width)
     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
     return dataset, dataloader
