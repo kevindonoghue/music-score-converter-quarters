@@ -215,3 +215,58 @@ def random_augmentation(x, height, width):
     x = rescale(x, height, width)
     x = random_post_augmentation(x)
     return x
+
+
+
+################################ for scores #####################################
+
+def random_score_resize(x):
+    left = int(np.maximum(-1, x.shape[1]*np.random.randn()*0.05))
+    right = int(np.maximum(-10, x.shape[1]*np.random.randn()*0.05))
+    vertical_base = np.abs(x.shape[0]*np.random.randn()*0.1)
+    top = int(np.maximum(vertical_base + np.random.randn()*0.05, 0))
+    bottom = int(np.maximum(vertical_base + np.random.randn()*0.05, 0))
+    # top = int(np.abs(x.shape[0]*np.random.randn()*0.3))
+    # bottom = int(np.abs(x.shape[0]*np.random.randn()*0.3))
+    if left > 0:
+        x = extend_left(x, left)
+    else:
+        x = clip_left(x, np.abs(left))
+    if right > 0:
+        x = extend_right(x, right)
+    else:
+        x = clip_right(x, np.abs(right))
+    x = extend_up(x, top)
+    x = extend_down(x, bottom)
+    return x
+
+
+def random_score_thicken(x):
+    dim_choices = [(2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8)]
+    dims = dim_choices[np.random.randint(len(dim_choices))]
+    x = thicken(x, dims)
+    return x
+
+
+def random_score_pre_augmentation(x):
+    if np.random.rand() < 0.8:
+        x = random_shrink_whitespace(x)
+    if np.random.rand() < 0.9:
+        x = random_score_resize(x)
+    if np.random.rand() < 0.5:
+        x = random_score_thicken(x)
+    if np.random.rand() < 0.3:
+        x = random_splotches(x)
+    if np.random.rand() < 0.6:
+        x = random_noise(x)
+    if np.random.rand() < 0.3:
+        x = random_jiggle(x)
+    if np.random.rand() < 0.3:
+        x = transform.rotate(x, np.random.randn()*0.6, cval=1)
+    return x
+
+def random_score_augmentation(x, height, width):
+    x = random_score_pre_augmentation(x)
+    x = rescale(x, height, width)
+    x = random_post_augmentation(x)
+    return x

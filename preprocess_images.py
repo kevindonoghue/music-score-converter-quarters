@@ -11,4 +11,4 @@ for i in range(40000):
     processed_image = (random_augmentation(raw_image, 200, 200)*255).astype(np.uint8)
     images.append(processed_image)
 images = np.array(images)
-np.save('data/quarter_measure_data_images_preprocessed.npy', images)
+np.save('data/quarter_measure_data_images_preprocessed-2.npy', images)

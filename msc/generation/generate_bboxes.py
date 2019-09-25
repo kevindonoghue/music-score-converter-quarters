@@ -118,4 +118,4 @@ def get_bboxes(svg_path):
 
     return bboxes
 
-print(get_bboxes('sample_score-3.svg'))
+# print(get_bboxes('sample_score-3.svg'))

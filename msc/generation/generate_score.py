@@ -242,5 +242,5 @@ chord_probs = np.array([5, 1, 5, 5, 5, 5, 1, 100, 1, 5, 5, 5, 5, 1, 5])
 chord_probs = chord_probs / chord_probs.sum()
 # print(generate_score(16, 4, 3, 0.2, chord_probs).prettify())
 
-# with open('sample_score.musicxml', 'w+') as f:
-#     f.write(str(generate_score(64, 16, 3, 0.2, chord_probs)))
+with open('sample_score.musicxml', 'w+') as f:
+    f.write(str(generate_score(64, 16, 3, 0.2, chord_probs)))

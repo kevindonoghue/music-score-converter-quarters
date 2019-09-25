@@ -112,13 +112,13 @@ for div in tp:
 
 
 def produce_subdivision(total):
-    # items = list(tp[total].items())
-    # probs = [prob for _, prob in items]
-    # n = np.random.choice(len(probs), p=probs)
-    # split = items[n][0]
-    # if not split:
-    #     return [total]
-    # else:
-    #     return produce_subdivision(split[0]) + produce_subdivision(split[1])
-    return [4]*int(total/4)
+    items = list(tp[total].items())
+    probs = [prob for _, prob in items]
+    n = np.random.choice(len(probs), p=probs)
+    split = items[n][0]
+    if not split:
+        return [total]
+    else:
+        return produce_subdivision(split[0]) + produce_subdivision(split[1])
+    # return [4]*int(total/4)
 
