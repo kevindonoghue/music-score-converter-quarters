@@ -3,6 +3,14 @@ from generate_rhythm import produce_subdivision
 from generate_chords import generate_chords
 from bs4 import BeautifulSoup
 
+pitch_ordering_dict = dict()
+pitch_ordering_dict_reverse = dict()
+counter = 0
+for letter in ['C, D, E, F, G, A, B']:
+    for i in range(8):
+        pitch_ordering_dict[letter + str(i)] = counter
+        pitch_ordering_dict_reverse[counter] = letter + str(i)
+        counter += 1
 
 def generate_measure(total, key_number, rest_prob, chord_probs):
     # total is the total length of the measure in 16th notes
@@ -157,7 +165,10 @@ def generate_measure(total, key_number, rest_prob, chord_probs):
         if x == 'rest':
             return [note_to_soup(None, dur, True, staff_number)]
         else:
-            notes = [note_to_soup(s, dur, False, staff_number) for s in x]
+            notes_as_numbers = [pitch_ordering_dict[s] for s in x]
+            notes_as_numbers.sort()
+            notes = [pitch_ordering_dict_reverse[i] for i in notes_as_numbers]
+            notes = [note_to_soup(s, dur, False, staff_number) for s in notes]
             if len(notes) > 1:
                 for note in notes[1:]:
                     note.insert(0, soup.new_tag('chord'))

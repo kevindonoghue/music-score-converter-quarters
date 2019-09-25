@@ -113,7 +113,7 @@ def generate_measure(total, rest_prob, chord_probs, measure_number):
     for clef_type in ('treble', 'bass'):
         staff_number = 1 if clef_type == 'treble' else 2
         chords[clef_type] = [chord_to_soup(chord, rhythm[clef_type][i], staff_number) for i, chord in enumerate(chords[clef_type])]
-        if np.random.rand() < 0 and len(chords[clef_type]) > 1:
+        if np.random.rand() < 0.5 and len(chords[clef_type]) > 1:
             slur_indices = np.random.choice(len(chords[clef_type]), size=2, replace=False)
             initial_index = np.min(slur_indices)
             final_index = np.max(slur_indices)
@@ -131,7 +131,7 @@ def generate_measure(total, rest_prob, chord_probs, measure_number):
                 final_note.append(notations)
                 notations.append(slur)
         for i, chord in enumerate(chords[clef_type]):
-            if np.random.rand() < 0 and staff_number == 1:
+            if np.random.rand() < 0.2 and staff_number == 1:
                 direction = soup.new_tag('direction')
                 direction['placement'] = 'below'
                 direction_type = soup.new_tag('direction-type')

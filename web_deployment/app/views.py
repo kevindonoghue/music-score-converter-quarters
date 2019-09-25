@@ -1,6 +1,7 @@
 from django.shortcuts import render
 import torch
 from model import run_model
+from model import Net
 from .forms import UploadedFileForm
 
 

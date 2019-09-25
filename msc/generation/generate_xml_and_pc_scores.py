@@ -2,10 +2,14 @@ import numpy as np
 from generate_score import generate_score
 from xml_to_pc import xml_to_pc
 import json
+import os
 
+
+if not os.path.exists('score_data/'):
+    os.mkdir('score_data/')
 
 extra_score_data = []
-for i in range(10000):
+for i in range(5000):
     chord_probs = np.array([5, 1, 5, 5, 5, 5, 1, 100, 1, 5, 5, 5, 5, 1, 5])
     chord_probs = chord_probs / chord_probs.sum()
     measure_length = int(4*np.random.choice([3, 4]))

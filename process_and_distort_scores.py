@@ -35,7 +35,7 @@ def resize(source_path, target_path):
 
 
 source_dir = 'data/score_data/'
-target_dir = 'data/score_data_distorted_yolo/'
+target_dir = 'data/score_data_yolo/'
 if not os.path.exists(target_dir):
     os.mkdir(target_dir)
 
@@ -58,5 +58,3 @@ for filename in os.listdir(source_dir):
         image = gray2rgb(image)
         image = (image*255).astype(np.uint8)
         io.imsave(target_dir + 'images/' + filename, image)
-
-        resize(source_dir + filename, target_dir + 'images/' + filename)
