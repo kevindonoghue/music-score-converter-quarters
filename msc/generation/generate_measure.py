@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 pitch_ordering_dict = dict()
 pitch_ordering_dict_reverse = dict()
 counter = 0
-for letter in ['C, D, E, F, G, A, B']:
-    for i in range(8):
+for i in range(8):
+    for letter in ['C', 'D', 'E', 'F', 'G', 'A', 'B']:
         pitch_ordering_dict[letter + str(i)] = counter
         pitch_ordering_dict_reverse[counter] = letter + str(i)
         counter += 1
@@ -100,7 +100,8 @@ def generate_measure(total, key_number, rest_prob, chord_probs):
             pitch = soup.new_tag('pitch')
             step = soup.new_tag('step')
             step.string = s[0]
-            alt = str(np.random.choice(['-1', '0', '1'], p=[0.15, 0.7, 0.15]))
+            # alt = str(np.random.choice(['-1', '0', '1'], p=[0.15, 0.7, 0.15]))
+            alt = str(np.random.choice(['-1', '0', '1']))
             if alt != '0':
                 alter = soup.new_tag('alter')
                 alter.string = str(alt)
@@ -222,7 +223,7 @@ def generate_measure(total, key_number, rest_prob, chord_probs):
 
 chord_probs = np.array([5, 1, 5, 5, 5, 5, 1, 100, 1, 5, 5, 5, 5, 1, 5])
 chord_probs = chord_probs / chord_probs.sum()
-# print(generate_measure(16, 'treble', 3, 0.2).prettify())
+# print(generate_measure(16, 3, 0.2, chord_probs).prettify())
 
 # with open('sample_measure.musicxml', 'w+') as f:
 #     f.write(str(generate_measure(12, 3, 0.2, chord_probs)))

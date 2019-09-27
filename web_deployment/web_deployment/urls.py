@@ -21,7 +21,9 @@ from app import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.upload, name='upload')
+    path('measure_upload', views.measure_upload, name='measure_upload'),
+    path('measure_output', views.measure_output, name='measure_output'),
+    path('page_upload', views.page_upload, name='page_upload'),
 ]
 
 if settings.DEBUG:

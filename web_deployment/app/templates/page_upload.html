@@ -1,0 +1,34 @@
+{% load static %}
+
+<html>
+
+<head>
+  <Title>Music Transcription</Title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'app/upload.css' %}">
+</head>
+
+<body>
+  <div class="container">
+    <div class="subcontainer">
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <table align="center">
+      <tr>
+        <td>
+          <label class="myLabel btn btn-secondary" for="{{ form.page.id_for_label }}">{{ form.page }}Choose a Page</label>
+        </td>
+        <td>
+          Key: {{ form.key }}
+        </td>
+        <td>
+          Time Signature: {{ form.time_signature }}
+        </td>
+      </tr>
+    </table>
+    <button class="btn btn-primary" type='submit'>Generate MusicXML</button>
+  </form>
+</div>
+</div>
+</body>
+</html>
