@@ -1,6 +1,8 @@
 import numpy as np
-from generate_rhythm import produce_subdivision
-from generate_chords import generate_chords
+from generate_simple_rhythm import produce_subdivision
+# from .generate_rhythm import produce_subdivision
+from generate_simple_chords import generate_simple_chords
+# from .generate_chords import generate_chords
 from bs4 import BeautifulSoup
 
 pitch_ordering_dict = dict()
@@ -22,7 +24,7 @@ def generate_measure(total, key_number, rest_prob, chord_probs):
     chords = dict()
     for clef_type in ('treble', 'bass'):
         rhythm[clef_type] = produce_subdivision(total)
-        chords[clef_type] = generate_chords(len(rhythm[clef_type]), clef_type, chord_probs)
+        chords[clef_type] = generate_simple_chords(len(rhythm[clef_type]), clef_type, chord_probs)
         for i, r in enumerate(rhythm[clef_type]):
             if r in (1, 2, 4, 8, 16):
                 rest_bool = np.random.choice([True, False], p=[rest_prob, 1-rest_prob])
@@ -196,7 +198,7 @@ def generate_measure(total, key_number, rest_prob, chord_probs):
                 final_note.append(notations)
                 notations.append(slur)
         for i, chord in enumerate(chords[clef_type]):
-            if np.random.rand() < 0 and staff_number == 1:
+            if np.random.rand() < 0.3 and staff_number == 1:
                 direction = soup.new_tag('direction')
                 direction['placement'] = 'below'
                 direction_type = soup.new_tag('direction-type')
@@ -225,5 +227,5 @@ chord_probs = np.array([5, 1, 5, 5, 5, 5, 1, 100, 1, 5, 5, 5, 5, 1, 5])
 chord_probs = chord_probs / chord_probs.sum()
 # print(generate_measure(16, 3, 0.2, chord_probs).prettify())
 
-# with open('sample_measure.musicxml', 'w+') as f:
-#     f.write(str(generate_measure(12, 3, 0.2, chord_probs)))
+with open('sample_measure.musicxml', 'w+') as f:
+    f.write(str(generate_measure(16, 0, 0.2, chord_probs)))

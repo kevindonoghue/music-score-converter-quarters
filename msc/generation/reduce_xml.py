@@ -24,6 +24,6 @@ def reduce_xml(path):
 
     return soup
 
-# reduced = reduce_xml('slur_beam_dynamic_example.musicxml')
-# with open('slur_beam_dynamic_example_reduced.musicxml', 'w+') as f:
-#     f.write(str(reduced))
+reduced = reduce_xml('half_note.musicxml')
+with open('half_note_reduced.musicxml', 'w+') as f:
+    f.write(str(reduced))

@@ -121,4 +121,3 @@ def produce_subdivision(total):
     # else:
     #     return produce_subdivision(split[0]) + produce_subdivision(split[1])
     return [4]*int(total/4)
-
